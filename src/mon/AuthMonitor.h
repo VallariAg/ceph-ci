@@ -169,6 +169,8 @@ private:
                    Formatter* fmtr, bool just_key=false);
   int _update_caps(EntityName& entity, std::vector<std::string>& caps_vec,
 		   MonOpRequestRef op);
+  bool _gen_wanted_caps(EntityAuth& e_auth, std::vector<std::string>& newcaps,
+			std::string& fs);
 
   bool check_rotate();
 

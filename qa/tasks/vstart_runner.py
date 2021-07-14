@@ -761,6 +761,23 @@ class LocalCephManager(CephManager):
         """
         return LocalRemote()
 
+    def get_keyring(self, client_id):
+        """
+        Return keyring for the given client.
+
+        :param client_id: str
+        :return keyring: str
+        """
+        if client_id.find('client.') != -1:
+            client_id = client_id.replace('client.', '')
+
+        keyring = self.run_cluster_cmd(args=f'auth get client.{client_id}',
+                                       stdout=StringIO()).\
+            stdout.getvalue().strip()
+
+        assert isinstance(keyring, str) and keyring != ''
+        return keyring
+
     def admin_socket(self, daemon_type, daemon_id, command, check_status=True,
                      timeout=None, stdout=None):
         if stdout is None:

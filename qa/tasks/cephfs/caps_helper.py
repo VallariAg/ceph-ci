@@ -68,6 +68,7 @@ class CapsHelper(CephFSTestCase):
                     cmdargs.append(path)
                     mount.negtestcmd(args=cmdargs, retval=1,
                                      errmsg='permission denied')
+                    cmdargs.pop(len(cmdargs)-1)
 
     def get_mon_cap_from_keyring(self, client_name):
         keyring = self.run_cluster_cmd(cmd=f'auth get {client_name}')

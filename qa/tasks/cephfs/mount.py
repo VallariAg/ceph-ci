@@ -749,18 +749,32 @@ class CephFSMount(object):
         kwargs['user'] = 'root'
         return self.run_as_user(**kwargs)
 
-    def _verify(self, proc, retval=None, errmsg=None):
-        if retval:
-            msg = ('expected return value: {}\nreceived return value: '
-                   '{}\n'.format(retval, proc.returncode))
-            assert proc.returncode == retval, msg
+    def assert_retval(self, proc_retval, exp_retval):
+        msg = (f'expected return value: {exp_retval}\nreceived return '
+               f'value: {proc_retval}\n')
+        assert proc_retval == exp_retval, msg
 
-        if errmsg:
-            stderr = proc.stderr.getvalue().lower()
-            msg = ('didn\'t find given string in stderr -\nexpected string: '
-                   '{}\nreceived error message: {}\nnote: received error '
-                   'message is converted to lowercase'.format(errmsg, stderr))
-            assert errmsg in stderr, msg
+    def _verify(self, proc_retval=None, proc_stderr=None, exp_retval=None,
+                exp_errmsg=None):
+        if exp_errmsg is None and exp_retval is None:
+            return
+
+        if exp_errmsg is None and exp_retval is not None:
+            self.assert_retval(proc_retval, exp_retval)
+            return
+
+        if isinstance(exp_errmsg, str):
+            exp_errmsg = (exp_errmsg, )
+        msg = ('didn\'t find expected string in stderr.\nexpected '
+               f'string: {exp_errmsg}\nreceived error message: {proc_stderr}\n'
+               'note: received error message is converted to lowercase')
+        for e in exp_errmsg:
+            if e in proc_stderr:
+                if exp_retval:
+                    self.assert_retval(proc_retval, exp_retval)
+                break
+        else:
+            assert False, msg
 
     def negtestcmd(self, args, retval=None, errmsg=None, stdin=None,
                    cwd=None, wait=True):
@@ -769,10 +783,15 @@ class CephFSMount(object):
 
         retval and errmsg are parameters to confirm the cause of command
         failure.
+
+        Note: errmsg can also be a list (besides just a string) of error
+        messages that you want this function to look for.
         """
         proc = self.run_shell(args=args, wait=wait, stdin=stdin, cwd=cwd,
                               check_status=False)
-        self._verify(proc, retval, errmsg)
+        proc_retval = proc.returncode
+        proc_stderr = proc.stderr.getvalue().lower()
+        self._verify(proc_retval, proc_stderr, retval, errmsg)
         return proc
 
     def negtestcmd_as_user(self, args, user, retval=None, errmsg=None,

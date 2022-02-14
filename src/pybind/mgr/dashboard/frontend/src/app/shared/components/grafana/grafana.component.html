@@ -12,8 +12,25 @@
                 i18n>Grafana Dashboard doesn't exist. Please refer to
   <cd-doc section="grafana"></cd-doc> on how to add dashboards to Grafana.</cd-alert-panel>
 
+  <cd-alert-panel type="info"
+                  *ngIf="!panelLoaded && !isChrome"
+                  i18n>The embedded Grafana Dashboard was blocked due to a certificate error, please click <a [href]="grafanaSrc"
+                     target="_blank"
+                     noopener
+                     noreferrer>here</a> to accept the security warning then reload this page</cd-alert-panel>
+
+
+  <cd-alert-panel type="info"
+                  *ngIf="isChrome"
+                  i18n>Hi, if the panel below has not loaded please click <a [href]="grafanaSrc"
+                     target="_blank"
+                     noopener
+                     noreferrer>here</a> to accept the security warning then reload this page. <span *ngIf="!cookiesEnabled">Browser cookies may be disabled please enable them for the panel to work</span></cd-alert-panel>
+
+
 <ng-container *ngIf="grafanaExist && dashboardExist">
-  <div class="row">
+  <div class="row"
+       *ngIf="panelLoaded">
     <div class="col">
       <div class="form-inline timepicker">
         <label for="timepicker"
@@ -44,12 +61,15 @@
     <div class="col">
       <div class="grafana-container">
         <iframe #iframe
+                crossorigin
                 id="iframe"
                 [src]="grafanaSrc"
                 class="grafana"
                 [ngClass]="panelStyle"
                 frameborder="0"
-                scrolling="no">
+                scrolling="no"
+                [hidden]="!panelLoaded"
+                (load)="onLoad($event)">
         </iframe>
       </div>
     </div>

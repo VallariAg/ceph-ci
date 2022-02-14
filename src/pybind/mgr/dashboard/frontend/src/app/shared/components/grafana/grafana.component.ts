@@ -23,6 +23,9 @@ export class GrafanaComponent implements OnInit, OnChanges {
   loading = true;
   styles: Record<string, string> = {};
   dashboardExist = true;
+  panelLoaded = false;
+  cookiesEnabled: boolean = navigator.cookieEnabled;
+  isChrome = false;
   time: string;
   grafanaTimes: any;
   icons = Icons;
@@ -160,12 +163,20 @@ export class GrafanaComponent implements OnInit, OnChanges {
       this.getFrame();
     });
     this.panelStyle = this.styles[this.grafanaStyle];
+    if (window['chrome'] !== undefined) {
+      this.isChrome = true;
+    }
+  }
+
+  onLoad() {
+    this.panelLoaded = true;
   }
 
   getFrame() {
-    this.settingsService
-      .validateGrafanaDashboardUrl(this.uid)
-      .subscribe((data: any) => (this.dashboardExist = data === 200));
+    this.settingsService.validateGrafanaDashboardUrl(this.uid).subscribe(
+      (data: any) => (this.dashboardExist = data === 200),
+      () => null
+    );
     this.url =
       this.baseUrl +
       this.uid +

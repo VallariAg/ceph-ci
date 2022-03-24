@@ -98,7 +98,7 @@ bool can_create_primary_snapshot(I *image_ctx, bool demoted, bool force,
       }
 
       if (requires_orphan != nullptr) {
-        *requires_orphan = !mirror_ns->is_demoted();
+        *requires_orphan = !mirror_ns->is_orphan();
       }
       if (!mirror_ns->complete) {
         ldout(cct, 20) << "needs rollback" << dendl;

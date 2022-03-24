@@ -246,13 +246,20 @@ void PromoteRequest<I>::handle_acquire_exclusive_lock(int r) {
 
 template <typename I>
 void PromoteRequest<I>::rollback() {
+  CephContext *cct = m_image_ctx->cct;
+  ldout(cct, 15) << dendl;
+
+  bool requires_orphan = false;
+  if (util::can_create_primary_snapshot(m_image_ctx, false, true, &requires_orphan,
+                                        &m_rollback_snap_id)) {
+    ldout(cct, 15) << "latest rollback_snap_id=" << m_rollback_snap_id << dendl;
+  }
+
   if (m_rollback_snap_id == CEPH_NOSNAP) {
     create_promote_snapshot();
     return;
   }
 
-  CephContext *cct = m_image_ctx->cct;
-  ldout(cct, 15) << dendl;
 
   std::shared_lock owner_locker{m_image_ctx->owner_lock};
   std::shared_lock image_locker{m_image_ctx->image_lock};

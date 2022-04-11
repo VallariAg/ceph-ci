@@ -286,7 +286,7 @@ class FuseMount(CephFSMount):
                 stderr = StringIO()
                 self.client_remote.run(args=['sudo', 'chmod', '1777',
                                              self.hostfs_mntpt],
-                                       timeout=300,
+                                       timeout=(2*60),
                                        stderr=stderr, omit_sudo=False)
                 break
             except run.CommandFailedError:

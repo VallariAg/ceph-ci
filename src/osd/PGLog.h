@@ -283,6 +283,12 @@ public:
     /****/
     void claim_log_and_clear_rollback_info(const pg_log_t& o) {
       // we must have already trimmed the old entries
+      if (rollback_info_trimmed_to_riter != log.rbegin()) {
+	ceph_abort_msgf("invalid rollback_info_trimmed_to_riter %s", rollback_info_trimmed_to_riter);
+      }
+      if (rollback_info_trimmed_to != head) {
+	ceph_abort_msgf("invalid rollback_info_trimmed_to %s %s" ,rollback_info_trimmed_to , head);
+      }
       ceph_assert(rollback_info_trimmed_to == head);
       ceph_assert(rollback_info_trimmed_to_riter == log.rbegin());
 

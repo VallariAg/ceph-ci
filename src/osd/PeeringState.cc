@@ -6503,6 +6503,7 @@ boost::statechart::result PeeringState::Stray::react(const MLogRec& logevt)
 
   ObjectStore::Transaction &t = context<PeeringMachine>().get_cur_transaction();
   if (msg->info.last_backfill == hobject_t()) {
+    psdout(10) << "...restart backfill..." << dendl;
     // restart backfill
     ps->info = msg->info;
     pl->on_info_history_change();

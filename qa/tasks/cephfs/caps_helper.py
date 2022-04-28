@@ -9,12 +9,20 @@ from teuthology.orchestra.run import Raw
 
 class CapsHelper(CephFSTestCase):
 
-    def write_test_files(self, mounts):
+    def write_test_files(self, mounts, testpath=''):
+        # XXX: testpath is supposed contain a path inside CephFS (which might
+        # be passed as an absolute path). Deleteing preceding '/' ensures that
+        # previous path components aren't deleted by os.path.join.
         filepaths, filedata = [], 'testdata'
         dirname, filename = 'testdir', 'testfile'
+        if testpath:
+            testpath = testpath[1:] if testpath[0] == '/' else testpath
+        # XXX: passing just '/' screw up os.path.join() ahead.
+        if testpath == '/':
+            testpath = ''
 
         for mount_x in mounts:
-            dirpath = os_path_join(mount_x.hostfs_mntpt, dirname)
+            dirpath = os_path_join(mount_x.hostfs_mntpt, testpath, dirname)
             mount_x.run_shell(f'mkdir {dirpath}')
             filepath = os_path_join(dirpath, filename)
             mount_x.write_file(filepath, filedata)
@@ -22,10 +30,10 @@ class CapsHelper(CephFSTestCase):
 
         return filepaths, (filedata,), mounts
 
-    def run_cap_tests(self, filepaths, filedata, mounts, perm):
+    def run_cap_tests(self, filepaths, filedata, mounts, perm, mntpt=None):
         # TODO
         #self.run_mon_cap_tests()
-        self.run_mds_cap_tests(filepaths, filedata, mounts, perm)
+        self.run_mds_cap_tests(filepaths, filedata, mounts, perm, mntpt=mntpt)
 
     def run_mon_cap_tests(self, moncap, keyring):
         keyring_path = self.fs.admin_remote.mktemp(data=keyring)
@@ -47,7 +55,16 @@ class CapsHelper(CephFSTestCase):
                 else:
                     self.assertNotIn('name: ' + fsname, fsls)
 
-    def run_mds_cap_tests(self, filepaths, filedata, mounts, perm):
+    def run_mds_cap_tests(self, filepaths, filedata, mounts, perm, mntpt=None):
+        # XXX: mntpt is path inside cephfs that serves as root for current
+        # mount. Therefore, this path must me deleted from filepaths.
+        # Example -
+        #   orignal path: /mnt/cephfs_x/dir1/dir2/testdir
+        #   cephfs dir serving as root for current mnt: /dir1/dir2
+        #   therefore, final path: /mnt/cephfs_x//testdir
+        if mntpt:
+            filepaths = [x.replace(mntpt, '') for x in filepaths]
+
         self.conduct_pos_test_for_read_caps(filepaths, filedata, mounts)
 
         if perm == 'rw':

@@ -60,15 +60,40 @@ class CapTester(CephFSTestCase):
         #self.run_mon_cap_tests()
         self.run_mds_cap_tests(perm, mntpt=mntpt)
 
-    def run_mon_cap_tests(self, moncap, keyring):
+    def _get_fsnames_from_moncap(self, moncap):
+        fsnames = []
+        while moncap.find('fsname=') != -1:
+            fsname_first_char = moncap.index('fsname=') + len('fsname=')
+
+            if ',' in moncap:
+                last = moncap.index(',')
+                fsname = moncap[fsname_first_char : last]
+                moncap = moncap.replace(moncap[0 : last+1], '')
+            else:
+                fsname = moncap[fsname_first_char : ]
+                moncap = moncap.replace(moncap[0 : ], '')
+
+            fsnames.append(fsname)
+
+        return fsnames
+
+    def run_mon_cap_tests(self, def_fs, moncap, client_id, keyring):
         """
         Check that MON cap is enforced for a client by searching for a Ceph
         FS name in output of cmd "fs ls" executed with that client's caps.
-        """
-        keyring_path = self.fs.admin_remote.mktemp(data=keyring)
 
-        fsls = self.run_cluster_cmd(f'fs ls --id {self.client_id} -k '
-                                    f'{keyring_path}')
+        XXX:
+        We need access to admin_remote which can easily happen through any
+        FS object and we need default FS to check case where no ceph fs name
+        is mentioned in the MON cap. Getting default FS from the caller, thus,
+        alone serves both the purpose.
+        """
+        get_cluster_cmd_op = def_fs.mon_manager.raw_cluster_cmd
+
+        keyring_path = def_fs.admin_remote.mktemp(data=keyring)
+
+        fsls = get_cluster_cmd_op(
+            args=f'fs ls --id {client_id} -k {keyring_path}')
 
         # we need to check only for default FS when fsname clause is absent
         # in MON/MDS caps
@@ -76,13 +101,8 @@ class CapTester(CephFSTestCase):
             self.assertIn(self.fs.name, fsls)
             return
 
-        fss = (self.fs1.name, self.fs2.name) if hasattr(self, 'fs1') else \
-            (self.fs.name,)
-        for fsname in fss:
-            if fsname in moncap:
-                self.assertIn('name: ' + fsname, fsls)
-            else:
-                self.assertNotIn('name: ' + fsname, fsls)
+        for fsname in self._get_fsnames_from_moncap(moncap):
+            self.assertIn('name: ' + fsname, fsls)
 
     def run_mds_cap_tests(self, perm, mntpt=None):
         """

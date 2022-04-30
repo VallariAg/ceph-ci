@@ -95,10 +95,9 @@ class CapTester(CephFSTestCase):
         fsls = get_cluster_cmd_op(
             args=f'fs ls --id {client_id} -k {keyring_path}')
 
-        # we need to check only for default FS when fsname clause is absent
-        # in MON/MDS caps
-        if 'fsname' not in moncap:
-            self.assertIn(self.fs.name, fsls)
+        if 'fsname=' not in moncap:
+            fsls_admin = get_cluster_cmd_op(args=f'fs ls')
+            self.assertEqual(fsls, fsls_admin)
             return
 
         for fsname in self._get_fsnames_from_moncap(moncap):

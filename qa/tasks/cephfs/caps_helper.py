@@ -27,7 +27,7 @@ class CapTester(CephFSTestCase):
         needs to be tested, call run_cap_tests(), run_mon_cap_tests() or
         run_mds_cap_tests() as per the need.
         """
-        dirname, filename, filedata = 'testdir', 'testfile', 'testdata'
+        dirname, filename = 'testdir', 'testfile'
         self.test_set = []
 
         # XXX: testpath is supposed contain a path inside CephFS (which might
@@ -43,6 +43,15 @@ class CapTester(CephFSTestCase):
             dirpath = os_path_join(mount_x.hostfs_mntpt, testpath, dirname)
             mount_x.run_shell(f'mkdir {dirpath}')
             filepath = os_path_join(dirpath, filename)
+            # XXX: the reason behind adding filepathm, cephfs_name and both
+            # mntpts is to avoid a test bug where we mount cephfs1 but what
+            # ends up being mounted cephfs2. since filepath and filedata are
+            # identical, how would tests figure otherwise that they are
+            # accessing the right filename but on wrong CephFS.
+            filedata = (f'filepath = {filepath}\n'
+                        f'cephfs_name = {mount_x.cephfs_name}\n'
+                        f'cephfs_mntpt = {mount_x.cephfs_mntpt}\n'
+                        f'hostfs_mntpt = {mount_x.hostfs_mntpt}')
             mount_x.write_file(filepath, filedata)
             self.test_set.append((mount_x, filepath, filedata))
 

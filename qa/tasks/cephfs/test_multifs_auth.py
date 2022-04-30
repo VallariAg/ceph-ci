@@ -44,7 +44,7 @@ class TestMONCaps(TestMultiFS):
 
     def test_moncap_with_one_fs_names(self):
         moncap = f'allow r fsname={self.fs1.name}'
-        keyring = self.setup_test_env(moncap)
+        keyring = self.create_client(self.client_id, moncap)
 
         self.captester.run_mon_cap_tests(self.fs1, moncap, self.client_id,
                                          keyring)
@@ -52,20 +52,17 @@ class TestMONCaps(TestMultiFS):
     def test_moncap_with_multiple_fs_names(self):
         moncap = (f'allow r fsname={self.fs1.name}, '
                   f'allow r fsname={self.fs2.name}')
-        keyring = self.setup_test_env(moncap)
+        keyring = self.create_client(self.client_id, moncap)
 
         self.captester.run_mon_cap_tests(self.fs1, moncap, self.client_id,
                                          keyring)
 
     def test_moncap_with_blanket_allow(self):
         moncap = 'allow r'
-        keyring = self.setup_test_env(moncap)
+        keyring = self.create_client(self.client_id, moncap)
 
         self.captester.run_mon_cap_tests(self.fs1, moncap, self.client_id,
                                          keyring)
-
-    def setup_test_env(self, moncap):
-        return self.create_client(self.client_id, moncap)
 
 
 #TODO: add tests for capsecs 'p' and 's'.
@@ -77,15 +74,22 @@ class TestMDSCaps(TestMultiFS):
     3. Remount the current mounts with this new client.
     4. Test read and write on both FSs.
     """
+    def setUp(self):
+        self.mounts = (self.mount_a, self.mount_b)
+
     def test_rw_with_fsname_and_no_path_in_cap(self):
         PERM = 'rw'
-        self.setup_test_env(PERM, True)
+        self.captester.write_test_files(self.mounts)
+        keyring_paths = self._create_client(PERM, fsname=True)
+        self.remount_with_new_client(keyirng_paths)
 
         self.captester.run_mds_cap_tests(PERM)
 
     def test_r_with_fsname_and_no_path_in_cap(self):
         PERM = 'r'
-        self.setup_test_env(PERM, True)
+        self.captester.write_test_files(self.mounts)
+        keyring_paths = self._create_client(PERM, fsname=True)
+        self.remount_with_new_client(keyring_paths)
 
         self.captester.run_mds_cap_tests(PERM)
 
@@ -93,7 +97,9 @@ class TestMDSCaps(TestMultiFS):
         PERM, CEPHFS_MNTPT = 'rw', 'dir1'
         self.mount_a.run_shell(f'mkdir {CEPHFS_MNTPT}')
         self.mount_b.run_shell(f'mkdir {CEPHFS_MNTPT}')
-        self.setup_test_env(PERM, True, CEPHFS_MNTPT)
+        self.captester.write_test_files(self.mounts, CEPHFS_MNTPT)
+        keyring_paths = self._create_client(PERM, fsname=True)
+        self.remount_with_new_client(keyring_paths, CEPHFS_MNTPT)
 
         self.captester.run_mds_cap_tests(PERM, CEPHFS_MNTPT)
 
@@ -101,7 +107,9 @@ class TestMDSCaps(TestMultiFS):
         PERM, CEPHFS_MNTPT = 'r', 'dir1'
         self.mount_a.run_shell(f'mkdir {CEPHFS_MNTPT}')
         self.mount_b.run_shell(f'mkdir {CEPHFS_MNTPT}')
-        self.setup_test_env(PERM, True, CEPHFS_MNTPT)
+        self.captester.write_test_files(self.mounts, CEPHFS_MNTPT)
+        keyring_paths = self._create_client(PERM, fsname=True)
+        self.remount_with_new_client(keyring_paths, CEPHFS_MNTPT)
 
         self.captester.run_mds_cap_tests(PERM, CEPHFS_MNTPT)
 
@@ -111,7 +119,9 @@ class TestMDSCaps(TestMultiFS):
         PERM, CEPHFS_MNTPT = 'rw', 'dir1'
         self.mount_a.run_shell(f'mkdir {CEPHFS_MNTPT}')
         self.mount_b.run_shell(f'mkdir {CEPHFS_MNTPT}')
-        self.setup_test_env(PERM, False, CEPHFS_MNTPT)
+        self.captester.write_test_files(self.mounts, CEPHFS_MNTPT)
+        keyring_paths = self._create_client(PERM)
+        self.remount_with_new_client(keyring_paths, CEPHFS_MNTPT)
 
         self.captester.run_mds_cap_tests(PERM, CEPHFS_MNTPT)
 
@@ -121,19 +131,25 @@ class TestMDSCaps(TestMultiFS):
         PERM, CEPHFS_MNTPT = 'r', 'dir1'
         self.mount_a.run_shell(f'mkdir {CEPHFS_MNTPT}')
         self.mount_b.run_shell(f'mkdir {CEPHFS_MNTPT}')
-        self.setup_test_env(PERM, False, CEPHFS_MNTPT)
+        self.captester.write_test_files(self.mounts, CEPHFS_MNTPT)
+        keyring_paths = self._create_client(PERM)
+        self.remount_with_new_client(keyring_paths, CEPHFS_MNTPT)
 
         self.captester.run_mds_cap_tests(PERM, CEPHFS_MNTPT)
 
     def test_rw_with_no_fsname_and_no_path(self):
         PERM = 'rw'
-        self.setup_test_env(PERM)
+        self.captester.write_test_files(self.mounts)
+        keyring_paths = self._create_client(PERM)
+        self.remount_with_new_client(keyring_paths)
 
         self.captester.run_mds_cap_tests(PERM)
 
     def test_r_with_no_fsname_and_no_path(self):
         PERM = 'r'
-        self.setup_test_env(PERM)
+        self.captester.write_test_files(self.mounts)
+        keyring_paths = self._create_client(PERM)
+        self.remount_with_new_client(keyring_paths)
 
         self.captester.run_mds_cap_tests(PERM)
 
@@ -165,31 +181,18 @@ class TestMDSCaps(TestMultiFS):
 
         return moncap, osdcap, mdscap
 
-    def setup_test_env(self, perm, fsname=False, cephfs_mntpt='/'):
-        """
-        Creates the cap string, files on both the FSs and then creates the
-        new client with the cap and remounts both the FSs with newly created
-        client.
-        """
-        self.captester.write_test_files((self.mount_a, self.mount_b),
-                                        cephfs_mntpt)
-
-        keyring_paths = self.create_client_and_keyring_file(perm, fsname,
-                                                            cephfs_mntpt)
-        self.remount_with_new_client(cephfs_mntpt, keyring_paths)
-
-    def create_client_and_keyring_file(self, perm, fsname, cephfs_mntpt):
+    def _create_client(self, perm, fsname=False, cephfs_mntpt='/'):
         moncap, osdcap, mdscap = self.generate_caps(perm, fsname,
                                                     cephfs_mntpt)
 
         keyring = self.create_client(self.client_id, moncap, osdcap, mdscap)
         keyring_paths = []
-        for mount_x in (self.mount_a, self.mount_b):
+        for mount_x in self.mounts
             keyring_paths.append(mount_x.client_remote.mktemp(data=keyring))
 
         return keyring_paths
 
-    def remount_with_new_client(self, cephfs_mntpt, keyring_paths):
+    def remount_with_new_client(self, keyring_paths, cephfs_mntpt='/'):
         if isinstance(cephfs_mntpt, str) and cephfs_mntpt != '/' :
             cephfs_mntpt = '/' + cephfs_mntpt
 

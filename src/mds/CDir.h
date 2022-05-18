@@ -460,6 +460,7 @@ public:
   bool is_exporting() { return state & STATE_EXPORTING; }
   bool is_importing() { return state & STATE_IMPORTING; }
   bool is_dirty_dft() { return state & STATE_DIRTYDFT; }
+  bool is_stable() { return (state == STATE_COMPLETE); }
 
   int get_dir_rep() const { return dir_rep; }
   bool is_rep() const { 

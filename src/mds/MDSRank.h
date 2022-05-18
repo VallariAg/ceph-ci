@@ -374,6 +374,11 @@ class MDSRank {
 		      const std::string& option, const std::string& value,
 		      std::ostream& ss);
 
+    // internal request id for data uninlining work during scrub
+    ceph_tid_t get_next_internal_reqid() {
+      return internal_reqid++;
+    }
+
     // Reference to global MDS::mds_lock, so that users of MDSRank don't
     // carry around references to the outer MDS, and we can substitute
     // a separate lock here in future potentially.
@@ -634,6 +639,8 @@ private:
 
     mono_time starttime = mono_clock::zero();
     boost::asio::io_context& ioc;
+
+    ceph_tid_t internal_reqid = 1;
 };
 
 /* This expects to be given a reference which it is responsible for.

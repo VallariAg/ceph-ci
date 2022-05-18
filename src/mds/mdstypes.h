@@ -856,6 +856,8 @@ void inode_t<Allocator>::dump(ceph::Formatter *f) const
   f->dump_int("export_pin", export_pin);
   f->dump_int("export_ephemeral_random_pin", export_ephemeral_random_pin);
   f->dump_bool("export_ephemeral_distributed_pin", export_ephemeral_distributed_pin);
+  f->dump_unsigned("inline_data_version", inline_data.version);
+  f->dump_unsigned("inline_data_length", inline_data.length());
 
   f->open_array_section("client_ranges");
   for (const auto &p : client_ranges) {

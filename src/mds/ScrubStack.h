@@ -22,6 +22,7 @@
 #include "ScrubHeader.h"
 
 #include "common/LogClient.h"
+#include "common/Cond.h"
 #include "include/elist.h"
 #include "messages/MMDSScrub.h"
 #include "messages/MMDSScrubStats.h"
@@ -152,6 +153,7 @@ private:
   friend std::ostream &operator<<(std::ostream &os, const State &state);
 
   friend class C_InodeValidated;
+  friend class C_ScrubFileInode;
 
   int _enqueue(MDSCacheObject *obj, ScrubHeaderRef& header, bool top);
   /**
@@ -265,6 +267,7 @@ private:
 
   void handle_scrub(const cref_t<MMDSScrub> &m);
   void handle_scrub_stats(const cref_t<MMDSScrubStats> &m);
+  void uninline_data(CInode *in, Context *fin);
 
   State state = STATE_IDLE;
   bool clear_stack = false;

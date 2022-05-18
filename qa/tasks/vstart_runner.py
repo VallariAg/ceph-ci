@@ -71,6 +71,7 @@ from IPy import IP
 import unittest
 import platform
 import logging
+from argparse import Namespace
 
 from unittest import suite, loader
 
@@ -943,7 +944,11 @@ class LocalCluster(object):
 
 class LocalContext(object):
     def __init__(self):
-        self.config = {'cluster': 'ceph'}
+        cluster_name = 'ceph'
+        self.config = {'cluster': cluster_name}
+        self.ceph = {}
+        self.ceph[cluster_name] = Namespace()
+        self.ceph[cluster_name].fsid = FSID
         self.teuthology_config = teuth_config
         self.cluster = LocalCluster()
         self.daemons = DaemonGroup()
@@ -1337,6 +1342,10 @@ def exec_test():
 
     if opt_create_cluster_only:
         return
+
+    global FSID
+    FSID = remote.run(args=[os.path.join(BIN_PREFIX, 'ceph'), 'fsid'],
+                      stdout=StringIO()).stdout.getvalue()
 
     if opt_use_ns and mon_in_localhost() and not opt_create_cluster:
         raise RuntimeError("cluster is on localhost; '--usens' option is incompatible. Or you can pass an extra '--create' option to create a new cluster without localhost!")

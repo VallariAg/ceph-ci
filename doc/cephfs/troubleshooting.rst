@@ -188,6 +188,35 @@ You can enable dynamic debug against the CephFS module.
 
 Please see: https://github.com/ceph/ceph/blob/master/src/script/kcon_all.sh
 
+In-memory Log Dump
+==================
+
+In-memory logs can be dumped by setting ``mds_extraordinary_events_dump_interval``
+during a lower level debugging (``log level < 10``). Enabling this option automatically
+sets the gather level to ``10`` on the Rank 0 MDS, so that it gathers the in-memory logs.
+``mds_extraordinary_events_dump_interval`` is the interval in seconds for dumping the recent
+in-memory logs when there is an Extra-Ordinary event.
+
+The Extra-Ordinary events are classified as:
+
+* Client Eviction
+* Missed Beacon ACK from the monitors
+* Missed Internal Heartbeats
+
+In-memory Log Dump is disabled by default to prevent log file bloat in a production environment. The below
+commands enable it::
+
+  $ ceph config set mds debug_mds <log_level>
+  $ ceph config set mds mds_extraordinary_events_dump_interval <n_seconds>
+
+The ``log_level`` should be < 10. When it is enabled, the MDS checks for extra-ordinary events every ``n``
+seconds and dump the in-memory logs if any of them occurs.
+
+.. note:: | For higher log levels (log level >= 10) there is no reason to dump the In-memory Logs.
+          | Thus a log level >=10 in debug_mds would prevent enabling the In-memory Log Dump.
+
+In-memory Log Dump is a special debug setting on a Rank 0 MDS. So a failover of Rank 0 MDS would disable it.
+
 Reporting Issues
 ================
 

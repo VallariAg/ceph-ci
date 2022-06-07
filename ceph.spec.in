@@ -317,6 +317,7 @@ BuildRequires:  gcc-toolset-11-libubsan-devel
 BuildRequires:  gcc-toolset-11-libasan-devel
 BuildRequires:  gcc-toolset-11-libatomic-devel
 BuildRequires:  systemd-devel
+BuildRequires:  systemd-libs
 %endif
 #################################################################################
 # distro-conditional dependencies
@@ -1279,6 +1280,7 @@ export CFLAGS=$(echo $RPM_OPT_FLAGS | sed -e 's/-Wp,-D_FORTIFY_SOURCE=2//g' \
 					  -e 's/-specs=\S*//g')
 find /opt/rh/gcc-toolset-11/root/usr/lib/gcc
 ls -al /opt/rh/gcc-toolset-11/root/usr/lib/gcc/x86_64-redhat-linux/11/plugin/
+ldd /opt/rh/gcc-toolset-11/root/usr/lib/gcc/x86_64-redhat-linux/11/plugin/annobin.so
 %endif
 
 env | sort

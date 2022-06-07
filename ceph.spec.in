@@ -1267,10 +1267,15 @@ export LDFLAGS="$RPM_LD_FLAGS"
 
 %if 0%{with seastar}
 # seastar uses longjmp() to implement coroutine. and this annoys longjmp_chk()
-export CXXFLAGS=$(echo $RPM_OPT_FLAGS | sed -e 's/-Wp,-D_FORTIFY_SOURCE=2//g')
+# also workaround the gcc-annobin.so plugin not found on gcc11
+export CXXFLAGS=$(echo $RPM_OPT_FLAGS | sed -e 's/-Wp,-D_FORTIFY_SOURCE=2//g' \
+					    -e 's/-grecord-gcc-switches//g' \
+					    -e 's/-specs=\S*//g')
 # remove from CFLAGS too because it causes the arrow submodule to fail with:
 #   warning _FORTIFY_SOURCE requires compiling with optimization (-O)
-export CFLAGS=$(echo $RPM_OPT_FLAGS | sed -e 's/-Wp,-D_FORTIFY_SOURCE=2//g')
+export CFLAGS=$(echo $RPM_OPT_FLAGS | sed -e 's/-Wp,-D_FORTIFY_SOURCE=2//g' \
+					  -e 's/-grecord-gcc-switches//g' \
+					  -e 's/-specs=\S*//g')
 %endif
 
 env | sort

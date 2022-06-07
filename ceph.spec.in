@@ -313,10 +313,10 @@ BuildRequires:  libatomic
 %endif
 %if 0%{?rhel}
 BuildRequires:  gcc-toolset-11-annobin-plugin-gcc
-BuildRequires:  gcc-toolset-11-gcc-gdb-plugin
 BuildRequires:  gcc-toolset-11-libubsan-devel
 BuildRequires:  gcc-toolset-11-libasan-devel
 BuildRequires:  gcc-toolset-11-libatomic-devel
+BuildRequires:  systemd-devel
 %endif
 #################################################################################
 # distro-conditional dependencies

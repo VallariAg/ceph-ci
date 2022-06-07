@@ -313,6 +313,7 @@ BuildRequires:  libatomic
 %endif
 %if 0%{?rhel}
 BuildRequires:  gcc-toolset-11-annobin-plugin-gcc
+BuildRequires:  gcc-toolset-11-gcc-gdb-plugin
 BuildRequires:  gcc-toolset-11-libubsan-devel
 BuildRequires:  gcc-toolset-11-libasan-devel
 BuildRequires:  gcc-toolset-11-libatomic-devel
@@ -1380,7 +1381,8 @@ cmake .. \
 %if 0%{with system_utf8proc}
     -DWITH_SYSTEM_UTF8PROC:BOOL=ON \
 %endif
-    -DWITH_GRAFANA:BOOL=ON
+    -DWITH_GRAFANA:BOOL=ON \
+    -DWITH_RDMA:BOOL=OFF
 
 %if %{with cmake_verbose_logging}
 cat ./CMakeFiles/CMakeOutput.log

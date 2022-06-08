@@ -316,6 +316,7 @@ BuildRequires:  gcc-toolset-11-annobin-plugin-gcc
 BuildRequires:  gcc-toolset-11-libubsan-devel
 BuildRequires:  gcc-toolset-11-libasan-devel
 BuildRequires:  gcc-toolset-11-libatomic-devel
+BuildRequires:  gcc-toolset-11-binutils
 BuildRequires:  systemd-devel
 BuildRequires:  systemd-libs
 %endif

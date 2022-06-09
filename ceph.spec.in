@@ -1282,6 +1282,9 @@ export CFLAGS=$(echo $RPM_OPT_FLAGS | sed -e 's/-Wp,-D_FORTIFY_SOURCE=2//g')
 find /opt/rh/gcc-toolset-11/root/usr/lib/gcc
 ls -al /opt/rh/gcc-toolset-11/root/usr/lib/gcc/x86_64-redhat-linux/11/plugin/
 ldd /opt/rh/gcc-toolset-11/root/usr/lib/gcc/x86_64-redhat-linux/11/plugin/annobin.so
+which as
+which gcc
+which g++
 %endif
 
 env | sort

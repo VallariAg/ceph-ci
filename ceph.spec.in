@@ -1281,6 +1281,7 @@ export CFLAGS=$(echo $RPM_OPT_FLAGS | sed -e 's/-Wp,-D_FORTIFY_SOURCE=2//g')
 
 export CC=`which gcc`
 export GCC=`which g++`
+export DISTUTILS_DEBUG=1
 %endif
 
 env | sort

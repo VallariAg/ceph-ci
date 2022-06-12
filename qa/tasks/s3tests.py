@@ -421,6 +421,7 @@ def run_tests(ctx, config):
             'S3TEST_CONF={tdir}/archive/s3-tests.{client}.conf'.format(tdir=testdir, client=client),
             'BOTO_CONFIG={tdir}/boto.cfg'.format(tdir=testdir)
             ]
+        scan_tests_errors = []
         # the 'requests' library comes with its own ca bundle to verify ssl
         # certificates - override that to use the system's ca bundle, which
         # is where the ssl task installed this certificate
@@ -446,9 +447,15 @@ def run_tests(ctx, config):
         if 'extra_args' in client_config:
             args.append(client_config['extra_args'])
 
+        if 'scan_logs' in client_config:
+            scan_logs_config = client_config.get('scan_logs')
+            print("scan_logs type:", scan_logs_config, type(scan_logs_config))
+            scan_tests_errors += ["nose"]
+
         remote.run(
             args=args,
-            label="s3 tests against rgw"
+            label="s3 tests against rgw",
+            scan_tests_errors=scan_tests_errors,
             )
     yield
 

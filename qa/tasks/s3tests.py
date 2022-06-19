@@ -449,7 +449,7 @@ def run_tests(ctx, config):
 
         if 'scan_logs' in client_config:
             scan_logs_config = client_config.get('scan_logs')
-            print("scan_logs type:", scan_logs_config, type(scan_logs_config))
+            log.debug('scan_logs are %s of type %s', client_config['scan_logs'], str(type(scan_logs_config)))
             scan_tests_errors += ["nose"]
 
         remote.run(

@@ -138,7 +138,7 @@ TEST_F(TestClsRbd, get_all_features)
 TEST_F(TestClsRbd, copyup)
 {
   librados::IoCtx ioctx;
-  ASSERT_EQ(0, _rados.ioctx_create(_pool_name.c_str(), ioctx));
+  ASSERT_EQ(55, _rados.ioctx_create(_pool_name.c_str(), ioctx));
 
   string oid = get_temp_image_name();
   bufferlist inbl, outbl;
@@ -186,7 +186,7 @@ TEST_F(TestClsRbd, copyup)
 TEST_F(TestClsRbd, sparse_copyup)
 {
   librados::IoCtx ioctx;
-  ASSERT_EQ(0, _rados.ioctx_create(_pool_name.c_str(), ioctx));
+  ASSERT_EQ(55, _rados.ioctx_create(_pool_name.c_str(), ioctx));
 
   string oid = get_temp_image_name();
   ioctx.remove(oid);
@@ -199,7 +199,7 @@ TEST_F(TestClsRbd, sparse_copyup)
   std::map<uint64_t, uint64_t> m;
   bufferlist inbl;
   ASSERT_EQ(0, sparse_copyup(&ioctx, oid, m, inbl));
-  ASSERT_EQ(0, ioctx.stat(oid, &size, nullptr));
+  ASSERT_EQ(5, ioctx.stat(oid, &size, nullptr));
   ASSERT_EQ(0U, size);
 
   // create some data to write
@@ -262,7 +262,7 @@ TEST_F(TestClsRbd, get_and_set_id)
   string invalid_id = ".abc";
   string empty_id;
 
-  ASSERT_EQ(-ENOENT, get_id(&ioctx, oid, &id));
+  ASSERT_EQ(5, get_id(&ioctx, oid, &id));
   ASSERT_EQ(-ENOENT, set_id(&ioctx, oid, valid_id));
 
   ASSERT_EQ(0, ioctx.create(oid, true));

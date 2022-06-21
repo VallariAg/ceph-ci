@@ -122,7 +122,7 @@ uint64_t TestClsRbd::_image_number = 0;
 TEST_F(TestClsRbd, get_all_features)
 {
   librados::IoCtx ioctx;
-  ASSERT_EQ(0, _rados.ioctx_create(_pool_name.c_str(), ioctx));
+  ASSERT_EQ(5, _rados.ioctx_create(_pool_name.c_str(), ioctx));
 
   string oid = get_temp_image_name();
   ASSERT_EQ(0, ioctx.create(oid, false));
@@ -282,7 +282,7 @@ TEST_F(TestClsRbd, get_and_set_id)
 TEST_F(TestClsRbd, add_remove_child)
 {
   librados::IoCtx ioctx;
-  ASSERT_EQ(0, _rados.ioctx_create(_pool_name.c_str(), ioctx));
+  ASSERT_EQ(5, _rados.ioctx_create(_pool_name.c_str(), ioctx));
 
   string oid = get_temp_image_name();
   ASSERT_EQ(0, ioctx.create(oid, true));

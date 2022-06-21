@@ -386,6 +386,12 @@ def _run_tests(ctx, refspec, role, tests, env, basedir,
                       if os.path.commonpath([w, dir_or_fname]) == dir_or_fname]
             if not to_run:
                 raise RuntimeError('Spec did not match any workunits: {spec!r}'.format(spec=spec))
+            scan_tests_errors = None
+            log.debug('optional_args {optional_args}'.format(optional_args=optional_args))
+            if 'scan_logs' in optional_args:
+                # TODO: consider for other kinds of tests
+                scan_tests_errors = ['gtest']
+                optional_args.remove('scan_logs')
             for workunit in to_run:
                 log.info('Running workunit %s...', workunit)
                 args = [
@@ -424,7 +430,8 @@ def _run_tests(ctx, refspec, role, tests, env, basedir,
                 remote.run(
                     logger=log.getChild(role),
                     args=args + optional_args,
-                    label="workunit test {workunit}".format(workunit=workunit)
+                    label="workunit test {workunit}".format(workunit=workunit),
+                    scan_tests_errors=scan_tests_errors
                 )
                 if cleanup:
                     args=['sudo', 'rm', '-rf', '--', scratch_tmp]
